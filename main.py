@@ -167,6 +167,12 @@ def forecast_case(case, name):
             qs = [level] * 5
         else:
             a, b = fit
+            if b < 0:
+                # A negative slope would say a bigger hour 1 means fewer
+                # viewers later, which is nonsense for a launch: fall back
+                # to the field's level at this hour.
+                b = 0.0
+                a = sum(ys) / len(ys)
             centre = a + b * log_p1
             residuals = [y - (a + b * x) for x, y in zip(xs, ys)]
             qs = [math.exp(centre + quantile_sorted(residuals, q)) for q in LEVELS]
